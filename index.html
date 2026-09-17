@@ -1,0 +1,340 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LeaseFinder – Leasinghändler finden</title>
+<style>
+:root{
+  --bg:#f5f7fb;--surface:#fff;--ink:#101828;--muted:#667085;--line:#e4e7ec;
+  --primary:#2563eb;--primary2:#1d4ed8;--soft:#eff6ff;--success:#12b76a;
+  --shadow:0 12px 35px rgba(16,24,40,.08);--radius:20px
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select{font:inherit}
+a{color:inherit;text-decoration:none}
+.lf-app{min-height:100vh}
+.lf-nav{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(22px,calc((100% - 1180px)/2));position:sticky;top:0;z-index:20}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}.logo-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#2563eb,#60a5fa);display:grid;place-items:center;color:#fff}
+.navlinks{display:flex;gap:24px;color:#475467;font-size:14px}.navlinks a:hover{color:var(--primary)}
+.nav-status{font-size:13px;color:#667085;display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:var(--success)}
+.hero{background:linear-gradient(135deg,#0b1220 0%,#14264a 55%,#1d4ed8 100%);color:#fff;padding:68px 20px 88px}
+.hero-inner{max-width:1180px;margin:auto}.eyebrow{display:inline-flex;padding:7px 11px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);border-radius:999px;font-size:12px;margin-bottom:18px}
+.hero h1{font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-.04em;margin:0 0 16px;max-width:760px}
+.hero p{font-size:18px;line-height:1.6;color:#dbe7ff;max-width:680px;margin:0}
+.search-card{max-width:1180px;margin:-42px auto 0;position:relative;z-index:5;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:22px}
+.search-grid{display:grid;grid-template-columns:1.4fr 1.4fr .75fr .75fr auto;gap:12px}
+.field label{display:block;font-size:12px;font-weight:700;color:#475467;margin:0 0 7px}.field input,.field select{width:100%;height:48px;border:1px solid #d0d5dd;border-radius:12px;padding:0 13px;background:#fff;outline:none}.field input:focus,.field select:focus{border-color:#84adff;box-shadow:0 0 0 4px #eff6ff}
+.btn{height:48px;border:0;border-radius:12px;padding:0 19px;font-weight:700;cursor:pointer;transition:.15s}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary2);transform:translateY(-1px)}
+.main{max-width:1180px;margin:34px auto 80px;padding:0 20px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 18px}.section-head h2{margin:0;font-size:24px}.sub{color:var(--muted);font-size:14px;margin-top:5px}
+.results-meta{display:flex;align-items:center;gap:8px;color:#667085;font-size:13px}
+.results{display:grid;gap:14px}
+.dealer{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:1fr auto;gap:16px;box-shadow:0 3px 12px rgba(16,24,40,.035)}
+.dealer:hover{box-shadow:var(--shadow);border-color:#cbd5e1}.dealer h3{margin:0 0 7px;font-size:18px}.dealer-address{color:#667085;font-size:14px;line-height:1.5}.dealer-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.tag{padding:6px 9px;background:#f2f4f7;border-radius:999px;font-size:12px;color:#475467}.distance{min-width:110px;text-align:right}.km{font-size:21px;font-weight:800}.km-label{font-size:12px;color:#667085}.dealer-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.btn-small{height:38px;padding:0 13px;border-radius:10px;border:1px solid #d0d5dd;background:#fff;font-weight:650;cursor:pointer}.btn-small.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.empty{background:#fff;border:1px dashed #cfd5dd;border-radius:18px;padding:44px;text-align:center;color:#667085}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:42px}.feature{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.feature-icon{width:40px;height:40px;border-radius:12px;background:var(--soft);color:var(--primary);display:grid;place-items:center;margin-bottom:13px}.feature h3{margin:0 0 7px;font-size:16px}.feature p{margin:0;color:#667085;font-size:14px;line-height:1.55}
+.toast{position:fixed;right:20px;bottom:20px;background:#101828;color:#fff;padding:13px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:50}
+@media(max-width:900px){.search-grid{grid-template-columns:1fr 1fr}.search-grid .full{grid-column:1/-1}.features{grid-template-columns:1fr}.navlinks{display:none}}
+@media(max-width:620px){.lf-nav{padding:0 16px}.nav-status{display:none}.hero{padding:48px 18px 72px}.hero h1{font-size:39px}.hero p{font-size:16px}.search-card{margin:-32px 12px 0;padding:15px}.search-grid{grid-template-columns:1fr}.search-grid .full{grid-column:auto}.main{padding:0 12px;margin-top:25px}.dealer{grid-template-columns:1fr}.distance{text-align:left}.dealer-actions{justify-content:flex-start}.section-head{align-items:flex-start;flex-direction:column}}
+</style>
+</head><body>
+<div class="lf-app">
+  <nav class="lf-nav">
+    <div class="logo"><span class="logo-mark">L</span><span>LeaseFinder</span></div>
+    <div class="navlinks"><a href="#suche">Suche</a><a href="#ergebnisse">Händler</a><a href="#vorteile">So funktioniert's</a></div>
+    <div class="nav-status"><span class="dot"></span> Händlerdatenbank aktiv</div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">🚗 Leasingangebote in deiner Nähe</span>
+      <h1>Dein Wunschauto.<br>Die passenden Händler.</h1>
+      <p>Finde Händler nach Marke, Modell, Budget und Entfernung – und sende anschließend deine individuelle Leasinganfrage.</p>
+    </div>
+  </section>
+
+  <section class="search-card" id="suche">
+    <div class="search-grid">
+      <div class="field">
+        <label for="lf-plz">PLZ</label>
+        <input id="lf-plz" inputmode="numeric" maxlength="5" placeholder="z. B. 73730">
+      </div>
+      <div class="field">
+        <label for="lf-model">Marke oder Modell</label>
+        <input id="lf-model" placeholder="z. B. BMW 3er">
+      </div>
+      <div class="field">
+        <label for="lf-radius">Umkreis</label>
+        <select id="lf-radius"><option value="25">25 km</option><option value="50" selected>50 km</option><option value="100">100 km</option></select>
+      </div>
+      <div class="field">
+        <label for="lf-budget">Max. Rate</label>
+        <input id="lf-budget" type="number" min="0" placeholder="z. B. 400 €">
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" id="lf-search" type="button">Händler finden</button>
+      </div>
+    </div>
+    <div id="lf-status" style="margin-top:12px;color:#667085;font-size:13px"></div>
+  </section>
+
+  <main class="main">
+    <section id="ergebnisse">
+      <div class="section-head">
+        <div><h2>Händler in deiner Nähe</h2><div class="sub" id="lf-summary">Gib deine PLZ ein, um passende Händler zu finden.</div></div>
+        <div class="results-meta" id="lf-count"></div>
+      </div>
+      <div class="results" id="lf-results">
+        <div class="empty"><strong>Starte deine Suche</strong><br><span>PLZ eingeben, Radius auswählen und auf „Händler finden“ klicken.</span></div>
+      </div>
+    </section>
+
+    <section class="features" id="vorteile">
+      <div class="feature"><div class="feature-icon">📍</div><h3>Echte Entfernung</h3><p>LeaseFinder sortiert Händler nach ihrer tatsächlichen geografischen Entfernung.</p></div>
+      <div class="feature"><div class="feature-icon">🔎</div><h3>Gezielt filtern</h3><p>Marke, Modell, Budget und Umkreis lassen sich direkt bei der Suche kombinieren.</p></div>
+      <div class="feature"><div class="feature-icon">✉️</div><h3>Anfrage vorbereiten</h3><p>Passende Händler können anschließend mit deiner individuellen Leasinganfrage kontaktiert werden.</p></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="lf-toast"></div>
+
+<script>
+(function(){
+ const API_BASE=window.LEASEFINDER_API_BASE||"http://localhost:3000";
+ const $=id=>document.getElementById(id);
+ const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+ function hav(a,b){const R=6371,r=x=>x*Math.PI/180,dlat=r(b.lat-a.lat),dlon=r(b.lon-a.lon),x=Math.sin(dlat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dlon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+ async function center(plz){
+   const u=new URL("https://nominatim.openstreetmap.org/search");
+   u.searchParams.set("postalcode",plz);u.searchParams.set("country","Germany");u.searchParams.set("format","jsonv2");u.searchParams.set("limit","1");
+   const r=await fetch(u);if(!r.ok)throw Error("PLZ konnte nicht gefunden werden.");
+   const d=await r.json();if(!d.length)throw Error("PLZ nicht gefunden.");
+   return {lat:+d[0].lat,lon:+d[0].lon};
+ }
+ function render(rows,plz,radius){
+   $("lf-count").textContent=rows.length+" Händler";
+   $("lf-summary").textContent=`Passende Händler innerhalb von ${radius} km um ${plz}`;
+   if(!rows.length){$("lf-results").innerHTML='<div class="empty"><strong>Keine passenden Händler gefunden.</strong><br>Versuche einen größeren Umkreis oder ändere deine Filter.</div>';return;}
+   $("lf-results").innerHTML=rows.map(d=>`<article class="dealer">
+      <div><h3>${esc(d.name)}</h3><div class="dealer-address">${esc(d.address||"")}${d.postal_code||d.city?`<br>${esc([d.postal_code,d.city].filter(Boolean).join(" "))}`:""}</div>
+      <div class="dealer-tags">${d.brand?`<span class="tag">${esc(d.brand)}</span>`:""}${d.phone?`<span class="tag">☎ ${esc(d.phone)}</span>`:""}</div>
+      <div class="dealer-actions">${d.phone?`<a class="btn-small" href="tel:${esc(d.phone)}">Anrufen</a>`:""}${d.email?`<a class="btn-small primary" href="mailto:${esc(d.email)}">Anfrage</a>`:""}</div></div>
+      <div class="distance"><div class="km">${Number(d.distance_km).toFixed(1)} km</div><div class="km-label">Entfernung</div></div>
+   </article>`).join("");
+ }
+ $("lf-search").addEventListener("click",async()=>{
+   const plz=$("lf-plz").value.trim(),radius=+$("lf-radius").value,model=$("lf-model").value.trim();
+   if(!/^\d{5}$/.test(plz)){ $("lf-status").textContent="Bitte eine gültige 5-stellige PLZ eingeben.";return; }
+   $("lf-search").disabled=true;$("lf-status").textContent="Suche Händler …";$("lf-results").innerHTML='<div class="empty">Händler werden gesucht …</div>';
+   try{
+     const c=await center(plz);
+     const u=new URL(API_BASE+"/api/dealers/nearby");u.searchParams.set("lat",c.lat);u.searchParams.set("lon",c.lon);u.searchParams.set("radius",radius);
+     const r=await fetch(u);if(!r.ok)throw Error("Backend nicht erreichbar.");
+     const data=await r.json();
+     let rows=data.dealers||[];
+     if(model) rows=rows.filter(d=>(d.name+" "+(d.brand||"")+" "+(d.city||"")).toLowerCase().includes(model.toLowerCase()));
+     render(rows,plz,radius);$("lf-status").textContent="Suche abgeschlossen.";
+   }catch(e){
+     $("lf-status").textContent="Die Händlerdatenbank ist gerade nicht erreichbar. Starte bitte das LeaseFinder-Backend.";
+     $("lf-results").innerHTML='<div class="empty"><strong>Backend nicht verbunden</strong><br>Starte im Projektordner <code>npm install</code> und anschließend <code>npm start</code>.</div>';
+   }finally{$("lf-search").disabled=false;}
+ });
+ $("lf-plz").addEventListener("keydown",e=>{if(e.key==="Enter")$("lf-search").click();});
+})();
+</script>
+
+<script>
+
+const DEALERS=[{"name": "BMW Stuttgart", "brand": "BMW", "address": "Pascalstraße 1, 70569 Stuttgart", "rating": 4.7, "reviews": 3721, "phone": "+49 711 13180"}, {"name": "BMW Stuttgart Rosensteinpark", "brand": "BMW", "address": "Pragstraße 140, 70376 Stuttgart-Bad Cannstatt", "rating": 4.7, "reviews": 690, "phone": "+49 711 13188000"}, {"name": "Autohaus Briem Filderstadt", "brand": "BMW", "address": "Gutenbergstraße 9, 70794 Filderstadt-Plattenhardt", "rating": 4.4, "reviews": 266, "phone": "+49 711 778810"}, {"name": "Autohaus Briem Leinfelden", "brand": "BMW", "address": "Stuttgarter Str. 87, 70771 Leinfelden-Echterdingen", "rating": 4.7, "reviews": 141, "phone": "+49 711 9036200"}, {"name": "Mercedes-Benz Niederlassung Stuttgart", "brand": "Mercedes-Benz", "address": "Mercedesstraße 102, 70372 Stuttgart", "rating": 4.7, "reviews": 1982, "phone": "+49 711 2590"}, {"name": "Mercedes-Benz Niederlassung Stuttgart Feuerbach", "brand": "Mercedes-Benz", "address": "Heilbronner Str. 339, 70469 Stuttgart", "rating": 4.5, "reviews": 2662, "phone": "+49 711 2590"}, {"name": "Mercedes-Benz Niederlassung Stuttgart Hallschlag", "brand": "Mercedes-Benz", "address": "Hallschlag 65, 70376 Stuttgart", "rating": 4.0, "reviews": 924, "phone": "+49 711 2590"}, {"name": "Mercedes-Benz Niederlassung Stuttgart Degerloch", "brand": "Mercedes-Benz", "address": "Tränkestraße 18, 70597 Stuttgart", "rating": 3.9, "reviews": 506, "phone": "+49 711 2590"}, {"name": "Volkswagen Automobile Stuttgart", "brand": "Volkswagen", "address": "Hauptstraße 166, 70563 Stuttgart", "rating": 4.6, "reviews": 1272, "phone": "+49 711 7373000"}, {"name": "Volkswagen Automobile Stuttgart", "brand": "Volkswagen", "address": "Wangener Str. 66, 70188 Stuttgart", "rating": 4.6, "reviews": 1693, "phone": "+49 711 46020"}, {"name": "Volkswagen Automobile Stuttgart", "brand": "Volkswagen", "address": "Heilbronner Str. 392, 70469 Stuttgart-Feuerbach", "rating": 4.5, "reviews": 1500, "phone": "+49 711 138930"}, {"name": "VW & Skoda Autohaus Marquardt Service GmbH", "brand": "Volkswagen", "address": "Rotweg 21, 70437 Stuttgart-Zuffenhausen", "rating": 4.7, "reviews": 424, "phone": "+49 711 9879790"}];
+const results=document.getElementById('results'),count=document.getElementById('count');
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function render(list){
+ count.textContent=list.length+' Treffer';
+ if(!list.length){results.innerHTML='<div style="padding:20px;border:1px dashed #cfd5dd;border-radius:14px;color:#667085;text-align:center">Keine passenden Händler gefunden.</div>';return;}
+ results.innerHTML=list.map((d,i)=>`<article class="dealer"><div class="dealerTop"><div class="dealerName">${esc(d.name)}</div><div class="badge">${esc(d.brand)}</div></div><div class="meta">📍 ${esc(d.address)}<br>☎ ${esc(d.phone)}</div><div class="rating">★ ${d.rating.toFixed(1)} · ${d.reviews.toLocaleString('de-DE')} Bewertungen</div><div class="actions"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.name+' '+d.address)}" target="_blank" rel="noopener">Karte</a><button type="button" data-i="${i}">Anfrage vorbereiten</button></div><div id="contact-${i}" style="margin-top:10px;font-size:13px;color:#667085">📧 Kontaktadresse noch nicht ermittelt</div></article>`).join('');
+ results.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+   const d=list[+b.dataset.i];
+   openPreview(d);
+ }));
+  results.querySelectorAll('button[data-contact]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const d=list[Number(btn.dataset.contact)];
+    const out=document.getElementById('contact-'+btn.dataset.contact);
+    out.textContent='🔎 Suche Kontaktadresse …';
+    try{
+      const r=await fetch('http://localhost:3000/api/dealer-contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:d.name,address:d.address,brand:d.brand})});
+      const j=await r.json();
+      if(!r.ok) throw new Error(j.error||'Kontakt konnte nicht ermittelt werden');
+      d.email=j.email||'';
+      out.textContent=d.email ? '📧 '+d.email+' · Quelle: '+(j.source||'verifiziert') : '📧 Keine öffentliche E-Mail gefunden';
+      if(d.email) btn.disabled=true;
+    }catch(e){out.textContent='⚠️ '+e.message;}
+  });
+
+}
+
+async function refreshDealerDatabase(){
+ const btn=document.getElementById('syncBtn'), info=document.getElementById('syncInfo');
+ btn.disabled=true; info.textContent='Händlerdaten werden aktualisiert …';
+ try{
+   const r=await fetch('http://localhost:3000/api/admin/sync-dealers',{method:'POST'});
+   const j=await r.json();
+   if(!r.ok) throw new Error(j.error||j.status||'Sync fehlgeschlagen');
+   info.textContent=`Aktualisiert: ${j.added} neu, ${j.updated} geändert. Quelle: Kfz-Innung Region Stuttgart`;
+   search();
+ }catch(e){ info.textContent='Aktualisierung fehlgeschlagen: '+e.message; }
+ finally{btn.disabled=false;}
+}
+document.getElementById('syncBtn')?.addEventListener('click',refreshDealerDatabase);
+
+async function search(){
+ const brand=document.getElementById('brand').value;
+ const model=document.getElementById('model').value.trim();
+ const city=document.getElementById('location').value.trim() || 'Stuttgart';
+ count.textContent='Suche …';
+ results.innerHTML='<div class="empty">Händlersuche läuft …</div>';
+ try{
+   const qs=new URLSearchParams({brand,model,city,limit:'50'});
+   const r=await fetch('http://localhost:3000/api/dealers?'+qs.toString());
+   const data=await r.json();
+   if(!r.ok) throw new Error(data.error||'Händlersuche fehlgeschlagen');
+   render(data.dealers);
+ }catch(e){
+   count.textContent='';
+   results.innerHTML='<div class="empty">Backend nicht erreichbar. Starte das LeaseFinder-Backend mit <code>npm start</code>.</div>';
+ }
+}
+
+document.getElementById('searchBtn').addEventListener('click',search);
+search();
+
+
+// LeaseFinder: echte Umkreissuche anhand gespeicherter Händler-Koordinaten.
+async function searchDealersNearby(lat, lon, radiusKm){
+  const url=`http://localhost:3000/api/dealers/nearby?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&radius=${encodeURIComponent(radiusKm)}`;
+  const r=await fetch(url);
+  if(!r.ok) throw new Error("Umkreissuche fehlgeschlagen");
+  return r.json();
+}
+
+
+</script>
+
+<script>
+
+(function(){
+  const API_BASE = window.LEASEFINDER_API_BASE || "http://localhost:3000";
+  const btn=document.getElementById("lf-plz-search");
+  const plzInput=document.getElementById("lf-plz");
+  const radiusInput=document.getElementById("lf-radius");
+  const status=document.getElementById("lf-plz-status");
+  const results=document.getElementById("lf-plz-results");
+  if(!btn) return;
+
+  function esc(v){
+    return String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  }
+  function haversine(a,b){
+    const R=6371, rad=x=>x*Math.PI/180;
+    const dLat=rad(b.lat-a.lat), dLon=rad(b.lon-a.lon);
+    const x=Math.sin(dLat/2)**2 + Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
+    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+  }
+  function render(rows){
+    if(!rows.length){
+      results.innerHTML="<p>Keine Händler in diesem Umkreis gefunden.</p>";
+      return;
+    }
+    results.innerHTML=rows.map(d=>`
+      <div style="padding:12px 0;border-bottom:1px solid #eee">
+        <strong>${esc(d.name)}</strong>
+        <span style="float:right">${Number(d.distance_km).toFixed(1)} km</span>
+        <div>${esc(d.address||"")}</div>
+        ${d.phone?`<div>☎ ${esc(d.phone)}</div>`:""}
+      </div>`).join("");
+  }
+
+  async function geocode(text){
+    const u=new URL("https://nominatim.openstreetmap.org/search");
+    u.searchParams.set("q",text);
+    u.searchParams.set("format","jsonv2");
+    u.searchParams.set("countrycodes","de");
+    u.searchParams.set("limit","1");
+    const r=await fetch(u.toString());
+    if(!r.ok) throw new Error("Geocoding fehlgeschlagen.");
+    const data=await r.json();
+    if(!data.length) return null;
+    return {lat:Number(data[0].lat),lon:Number(data[0].lon)};
+  }
+
+  async function getCenter(plz){
+    // Structured postal-code lookup is more reliable than "73730, Deutschland".
+    const u=new URL("https://nominatim.openstreetmap.org/search");
+    u.searchParams.set("postalcode",plz);
+    u.searchParams.set("country","Germany");
+    u.searchParams.set("format","jsonv2");
+    u.searchParams.set("limit","1");
+    const r=await fetch(u.toString());
+    if(!r.ok) throw new Error("PLZ konnte nicht aufgelöst werden.");
+    const data=await r.json();
+    if(!data.length) throw new Error("PLZ nicht gefunden.");
+    return {lat:Number(data[0].lat),lon:Number(data[0].lon)};
+  }
+
+  async function localFallback(center,radius){
+    const cached=JSON.parse(localStorage.getItem("leasefinder_geocodes")||"{}");
+    const rows=[];
+    // Only geocode missing local demo dealers once; results are cached in the browser.
+    for(const d of (typeof DEALERS!=="undefined"?DEALERS:[])){
+      const key=d.address;
+      let point=cached[key];
+      if(!point){
+        try{
+          point=await geocode(d.address+", Deutschland");
+          if(point){ cached[key]=point; localStorage.setItem("leasefinder_geocodes",JSON.stringify(cached)); }
+        }catch{}
+        await new Promise(r=>setTimeout(r,1100));
+      }
+      if(point){
+        const distance_km=haversine(center,point);
+        if(distance_km<=radius) rows.push({...d,distance_km});
+      }
+    }
+    return rows.sort((a,b)=>a.distance_km-b.distance_km);
+  }
+
+  btn.addEventListener("click",async()=>{
+    const plz=plzInput.value.trim();
+    const radius=Number(radiusInput.value);
+    if(!/^\d{5}$/.test(plz)){
+      status.textContent="Bitte eine gültige 5-stellige deutsche PLZ eingeben.";
+      return;
+    }
+    btn.disabled=true;
+    status.textContent="PLZ wird gesucht …";
+    results.innerHTML="";
+    try{
+      const center=await getCenter(plz);
+      let data=null;
+      try{
+        const r=await fetch(`${API_BASE}/api/dealers/nearby?lat=${center.lat}&lon=${center.lon}&radius=${radius}`);
+        if(r.ok) data=await r.json();
+      }catch{}
+
+      if(data){
+        status.textContent=`${data.count} Händler innerhalb von ${radius} km um ${plz}`;
+        render(data.dealers);
+      }else{
+        status.textContent="Backend nicht verbunden – lokale Händlerinformationen werden gesucht …";
+        const rows=await localFallback(center,radius);
+        status.textContent=`${rows.length} Händler innerhalb von ${radius} km um ${plz}`;
+        render(rows);
+      }
+    }catch(e){
+      status.textContent=e.message || "Suche fehlgeschlagen.";
+    }finally{
+      btn.disabled=false;
+    }
+  });
+})();
+
+</script>
+</body></html>
